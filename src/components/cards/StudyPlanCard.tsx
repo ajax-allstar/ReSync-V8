@@ -1,13 +1,15 @@
 import { RefreshCw, WandSparkles } from "lucide-react";
 import { useState } from "react";
 import { DashboardCard } from "../DashboardCard";
+import { Button } from "../ui/Button";
 import type { StudyPlanPreview } from "../../types/dashboard";
 
 type StudyPlanCardProps = {
+  onApplyPlan: (plan: StudyPlanPreview) => void;
   plans: StudyPlanPreview[];
 };
 
-export function StudyPlanCard({ plans }: StudyPlanCardProps) {
+export function StudyPlanCard({ onApplyPlan, plans }: StudyPlanCardProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const activePlan = plans[activeIndex];
 
@@ -69,14 +71,21 @@ export function StudyPlanCard({ plans }: StudyPlanCardProps) {
           </div>
         </div>
 
-        <button
-          className="ui-button-secondary mt-6 px-4 py-2.5"
-          onClick={handleRegenerate}
-          type="button"
-        >
-          <RefreshCw size={16} />
-          Regenerate plan
-        </button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button
+            onClick={() => onApplyPlan(activePlan)}
+            variant="primary"
+          >
+            Use this plan
+          </Button>
+          <Button
+            onClick={handleRegenerate}
+            variant="secondary"
+          >
+            <RefreshCw size={16} />
+            Regenerate plan
+          </Button>
+        </div>
       </div>
     </DashboardCard>
   );

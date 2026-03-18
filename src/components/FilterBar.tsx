@@ -20,6 +20,7 @@ export function FilterBar({
 
           return (
             <button
+              aria-pressed={isActive}
               key={filter}
               className={`relative rounded-full px-4 py-2.5 text-sm font-medium transition duration-300 sm:px-5 ${
                 isActive

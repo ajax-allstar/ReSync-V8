@@ -36,6 +36,10 @@ body {
   background: #f8f3ec;
 }
 
+html.calm-mode * {
+  scroll-behavior: auto;
+}
+
 button,
 a {
   cursor: pointer;
@@ -116,6 +120,22 @@ a {
   .ui-hover-lift {
     @apply transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_24px_52px_rgba(110,91,75,0.12)] dark:hover:shadow-[0_24px_52px_rgba(7,12,26,0.35)];
   }
+
+  .ui-field {
+    @apply w-full rounded-[22px] border border-white/80 bg-white/88 px-4 py-3 text-sm text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] transition duration-300 placeholder:text-slate-400 focus:border-emerald-200 dark:border-white/10 dark:bg-white/5 dark:text-slate-50 dark:placeholder:text-slate-500;
+  }
+
+  .ui-label {
+    @apply text-sm font-medium text-slate-700 dark:text-slate-100;
+  }
+
+  .ui-toggle {
+    @apply relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-white/80 bg-white/88 p-1 transition duration-300 dark:border-white/10 dark:bg-white/10;
+  }
+
+  .ui-toggle-thumb {
+    @apply h-5 w-5 rounded-full bg-slate-500 shadow-[0_8px_18px_rgba(15,23,42,0.18)] transition duration-300 dark:bg-slate-100;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -130,4 +150,16 @@ a {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+html.calm-mode .ui-hover-lift,
+html.calm-mode .ui-button-primary,
+html.calm-mode .ui-button-secondary {
+  transition-duration: 120ms !important;
+}
+
+html.calm-mode .ui-hover-lift:hover,
+html.calm-mode .ui-button-primary:hover,
+html.calm-mode .ui-button-secondary:hover {
+  transform: none !important;
 }

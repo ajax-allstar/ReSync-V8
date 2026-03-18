@@ -13,6 +13,7 @@ $$;
 create table if not exists public.profiles (
     id uuid primary key references auth.users(id) on delete cascade,
     full_name text default '',
+    avatar_url text default '',
     education_stage text default 'high-school' check (education_stage in ('elementary', 'high-school', 'higher-studies')),
     preferred_study_duration integer default 45 check (preferred_study_duration between 15 and 180),
     timezone text default 'Asia/Kolkata',

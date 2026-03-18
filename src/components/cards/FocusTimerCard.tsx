@@ -81,11 +81,19 @@ export function FocusTimerCard({ presets }: FocusTimerCardProps) {
                 <p className="text-xs font-semibold tracking-[0.22em] text-slate-400 uppercase">
                   Active session
                 </p>
-                <p className="mt-3 font-display text-5xl text-slate-950 dark:text-white">
+                <p
+                  aria-live="polite"
+                  className="mt-3 font-display text-5xl text-slate-950 dark:text-white"
+                  role="status"
+                >
                   {formatSeconds(secondsRemaining)}
                 </p>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-300">
-                  {isRunning ? "Deep breath, stay here." : "Ready when you are."}
+                  {secondsRemaining === 0
+                    ? "Session complete. Reset or choose another pace."
+                    : isRunning
+                      ? "Deep breath, stay here."
+                      : "Ready when you are."}
                 </p>
               </div>
             </div>
@@ -94,11 +102,19 @@ export function FocusTimerCard({ presets }: FocusTimerCardProps) {
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               className="ui-button-primary px-4 py-2.5"
-              onClick={() => setIsRunning((current) => !current)}
+              onClick={() => {
+                if (secondsRemaining === 0) {
+                  setSecondsRemaining(totalSeconds);
+                  setIsRunning(true);
+                  return;
+                }
+
+                setIsRunning((current) => !current);
+              }}
               type="button"
             >
               {isRunning ? <Pause size={16} /> : <Play size={16} />}
-              {isRunning ? "Pause" : "Start"}
+              {isRunning ? "Pause" : secondsRemaining === 0 ? "Restart" : "Start"}
             </button>
             <button
               className="ui-button-secondary px-4 py-2.5"

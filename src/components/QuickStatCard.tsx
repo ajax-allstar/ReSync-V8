@@ -2,6 +2,8 @@ import { ArrowUpRight } from "lucide-react";
 import type { QuickStat } from "../types/dashboard";
 
 type QuickStatCardProps = {
+  isActive?: boolean;
+  onClick: () => void;
   stat: QuickStat;
 };
 
@@ -13,10 +15,17 @@ const accentClasses: Record<QuickStat["accent"], string> = {
   gold: "from-amber-200/80 via-amber-50 to-white text-amber-900 dark:from-amber-400/20 dark:via-amber-300/5 dark:to-white/5 dark:text-amber-100",
 };
 
-export function QuickStatCard({ stat }: QuickStatCardProps) {
+export function QuickStatCard({
+  isActive = false,
+  onClick,
+  stat,
+}: QuickStatCardProps) {
   return (
-    <article
-      className={`ui-hover-lift group relative overflow-hidden rounded-[28px] border border-white/75 bg-gradient-to-br p-5 shadow-[0_18px_40px_rgba(120,104,91,0.10)] ${accentClasses[stat.accent]} dark:border-white/10`}
+    <button
+      aria-pressed={isActive}
+      className={`ui-hover-lift group relative w-full overflow-hidden rounded-[28px] border border-white/75 bg-gradient-to-br p-5 text-left shadow-[0_18px_40px_rgba(120,104,91,0.10)] ${accentClasses[stat.accent]} ${isActive ? "ring-2 ring-white/80 ring-offset-2 ring-offset-transparent dark:ring-white/15" : ""} dark:border-white/10`}
+      onClick={onClick}
+      type="button"
     >
       <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent dark:via-white/25" />
       <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/45 blur-2xl dark:bg-white/8" />
@@ -38,9 +47,9 @@ export function QuickStatCard({ stat }: QuickStatCardProps) {
           {stat.change}
         </p>
         <p className="max-w-[11rem] text-right text-sm leading-5 opacity-75">
-          {stat.detail}
+          {isActive ? "Currently highlighted" : stat.detail}
         </p>
       </div>
-    </article>
+    </button>
   );
 }

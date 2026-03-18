@@ -10,6 +10,13 @@ const recoveryPrompts = {
 
 export function RecoveryCard() {
   const [message, setMessage] = useState(recoveryPrompts.breathe);
+  const [activePrompt, setActivePrompt] =
+    useState<keyof typeof recoveryPrompts>("breathe");
+
+  function selectPrompt(prompt: keyof typeof recoveryPrompts) {
+    setActivePrompt(prompt);
+    setMessage(recoveryPrompts[prompt]);
+  }
 
   return (
     <DashboardCard
@@ -37,23 +44,26 @@ export function RecoveryCard() {
 
         <div className="mt-6 flex flex-wrap gap-3">
           <button
+            aria-pressed={activePrompt === "breathe"}
             className="ui-button-secondary border-transparent bg-white/90 px-4 py-2.5"
-            onClick={() => setMessage(recoveryPrompts.breathe)}
+            onClick={() => selectPrompt("breathe")}
             type="button"
           >
             <Wind size={16} />
             Breathe
           </button>
           <button
+            aria-pressed={activePrompt === "restart"}
             className="ui-button-secondary px-4 py-2.5"
-            onClick={() => setMessage(recoveryPrompts.restart)}
+            onClick={() => selectPrompt("restart")}
             type="button"
           >
             Restart
           </button>
           <button
+            aria-pressed={activePrompt === "continue"}
             className="ui-button-secondary px-4 py-2.5"
-            onClick={() => setMessage(recoveryPrompts.continue)}
+            onClick={() => selectPrompt("continue")}
             type="button"
           >
             Continue gently

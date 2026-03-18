@@ -1,14 +1,24 @@
 import { HeartHandshake, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { DashboardCard } from "../DashboardCard";
+import { Button } from "../ui/Button";
 import type { MoodLog, MoodOption } from "../../types/dashboard";
 
 type MoodTrackerCardProps = {
   moods: MoodOption[];
   history: MoodLog[];
+  isAuthenticated: boolean;
+  isSaving: boolean;
+  onSaveMood: (mood: MoodOption) => void;
 };
 
-export function MoodTrackerCard({ moods, history }: MoodTrackerCardProps) {
+export function MoodTrackerCard({
+  moods,
+  history,
+  isAuthenticated,
+  isSaving,
+  onSaveMood,
+}: MoodTrackerCardProps) {
   const [selectedMood, setSelectedMood] = useState(moods[0]);
 
   return (
@@ -68,6 +78,19 @@ export function MoodTrackerCard({ moods, history }: MoodTrackerCardProps) {
               </p>
             </div>
           </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            loading={isSaving}
+            onClick={() => onSaveMood(selectedMood)}
+            variant="primary"
+          >
+            {isAuthenticated ? "Save check-in" : "Sign in to save check-in"}
+          </Button>
+          <p className="text-sm text-slate-500 dark:text-slate-300">
+            Latest saved rhythm: {history.at(-1)?.label ?? "No entries yet"}.
+          </p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3">
