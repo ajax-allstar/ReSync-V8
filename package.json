@@ -4,6 +4,9 @@
   "description": "ReSync student productivity and wellness dashboard",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
