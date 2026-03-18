@@ -4,19 +4,23 @@ import type { ExamMilestone } from "../../types/dashboard";
 
 type ExamPrepCardProps = {
   milestones: ExamMilestone[];
+  showSample: boolean;
 };
 
-export function ExamPrepCard({ milestones }: ExamPrepCardProps) {
+export function ExamPrepCard({ milestones, showSample }: ExamPrepCardProps) {
   return (
     <DashboardCard
       accent="peach"
       category="Planner"
-      description="A grounded snapshot of where upcoming exams stand right now."
+      description="Review upcoming exams, readiness levels, and the next action to take."
       eyebrow="Exam Prep Snapshot"
       surface="solid"
-      title="Know what needs care before panic starts"
+      title="Know what needs attention before the deadline"
     >
       <div className="space-y-3">
+        <p className="ui-demo-label px-1">
+          {showSample ? "Sample exam progress" : "Blank exam tracker"}
+        </p>
         {milestones.map((milestone) => (
           <div
             key={milestone.id}
@@ -40,7 +44,7 @@ export function ExamPrepCard({ milestones }: ExamPrepCardProps) {
             </div>
             <div className="mt-4 h-2 rounded-full bg-orange-100 dark:bg-orange-400/10">
               <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,#f3b883,#e07a5f)]"
+                className="h-full rounded-full bg-[linear-gradient(90deg,#f3c294,#df8868)]"
                 style={{ width: `${milestone.readiness}%` }}
               />
             </div>

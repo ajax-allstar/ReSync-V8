@@ -22,12 +22,12 @@ export function RecoveryCard() {
     <DashboardCard
       accent="gold"
       category="Wellness"
-      description="Built for the moment where distraction happens and shame tries to take over."
+      description="Choose a quick reset when focus slips so restarting feels easier."
       eyebrow="Distraction Reset"
       surface="glass"
-      title="Come back without making it dramatic"
+      title="Use a simple reset instead of forcing it"
     >
-      <div className="ui-subpanel-glass border-amber-100/80 bg-[linear-gradient(135deg,rgba(255,246,232,0.92),rgba(255,255,255,0.8))] p-5 dark:border-amber-400/10 dark:bg-[linear-gradient(135deg,rgba(168,113,24,0.18),rgba(15,23,42,0.9))]">
+      <div className="ui-subpanel-glass border-amber-100/80 bg-[linear-gradient(135deg,rgba(255,246,232,0.9),rgba(255,255,255,0.86))] p-5 dark:border-amber-400/10 dark:bg-[linear-gradient(135deg,rgba(168,113,24,0.14),rgba(15,23,42,0.9))]">
         <div className="flex items-start gap-3">
           <div className="rounded-2xl bg-amber-100 p-3 text-amber-700 dark:bg-amber-400/12 dark:text-amber-100">
             <Flower2 size={20} />
@@ -42,6 +42,9 @@ export function RecoveryCard() {
           </div>
         </div>
 
+        <p className="ui-demo-label mt-5">
+          Quick reset ideas
+        </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <button
             aria-pressed={activePrompt === "breathe"}

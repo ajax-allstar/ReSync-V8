@@ -7,9 +7,10 @@ import type { StudyPlanPreview } from "../../types/dashboard";
 type StudyPlanCardProps = {
   onApplyPlan: (plan: StudyPlanPreview) => void;
   plans: StudyPlanPreview[];
+  showSample: boolean;
 };
 
-export function StudyPlanCard({ onApplyPlan, plans }: StudyPlanCardProps) {
+export function StudyPlanCard({ onApplyPlan, plans, showSample }: StudyPlanCardProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const activePlan = plans[activeIndex];
 
@@ -21,14 +22,17 @@ export function StudyPlanCard({ onApplyPlan, plans }: StudyPlanCardProps) {
     <DashboardCard
       accent="sky"
       category="Planner"
-      description="A structure preview that feels supportive, not robotic or rigid."
-      eyebrow="Study Structure Generator"
+      description="Organize subjects, study sessions, and break ideas before you begin."
+      eyebrow="Study Planner"
       surface="solid"
-      title="Preview a plan that matches your energy"
+      title="Build a study plan that matches your energy"
     >
       <div className="ui-subpanel border-sky-100/80 p-5 dark:border-sky-400/10">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
+            <p className="ui-demo-label">
+              {showSample ? "Sample plan" : "Blank planner"}
+            </p>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-300">
               Subject
             </p>
@@ -60,7 +64,7 @@ export function StudyPlanCard({ onApplyPlan, plans }: StudyPlanCardProps) {
           </div>
         </div>
 
-        <div className="mt-4 rounded-[24px] border border-dashed border-slate-200 bg-white/88 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.58)] dark:border-white/10 dark:bg-slate-950/50">
+        <div className="mt-4 rounded-[24px] border border-dashed border-slate-200 bg-white/90 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-white/10 dark:bg-slate-950/50">
           <div className="flex items-start gap-3">
             <div className="rounded-2xl bg-slate-100 p-2 text-slate-700 dark:bg-white/10 dark:text-slate-100">
               <WandSparkles size={18} />
@@ -73,17 +77,18 @@ export function StudyPlanCard({ onApplyPlan, plans }: StudyPlanCardProps) {
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Button
+            disabled={!showSample}
             onClick={() => onApplyPlan(activePlan)}
             variant="primary"
           >
-            Use this plan
+            {showSample ? "Use this plan" : "Sample view is off"}
           </Button>
           <Button
             onClick={handleRegenerate}
             variant="secondary"
           >
             <RefreshCw size={16} />
-            Regenerate plan
+            {showSample ? "Show another sample" : "Keep blank"}
           </Button>
         </div>
       </div>

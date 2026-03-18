@@ -10,6 +10,7 @@ type MoodTrackerCardProps = {
   isAuthenticated: boolean;
   isSaving: boolean;
   onSaveMood: (mood: MoodOption) => void;
+  showSample: boolean;
 };
 
 export function MoodTrackerCard({
@@ -18,6 +19,7 @@ export function MoodTrackerCard({
   isAuthenticated,
   isSaving,
   onSaveMood,
+  showSample,
 }: MoodTrackerCardProps) {
   const [selectedMood, setSelectedMood] = useState(moods[0]);
 
@@ -25,12 +27,20 @@ export function MoodTrackerCard({
     <DashboardCard
       accent="violet"
       category="Mood"
-      description="Small emotional check-ins make the rest of the dashboard feel more human."
+      description="Log how you feel and review recent patterns without leaving the dashboard."
       eyebrow="Mood Tracker"
       surface="glass"
-      title="Notice how your brain is arriving"
+      title="Check in before your next study block"
     >
       <div className="space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="ui-demo-label">
+            {showSample ? "Sample mood options" : "Blank mood tracker"}
+          </p>
+          <p className="text-sm text-slate-500 dark:text-slate-300">
+            Pick the closest feeling, then save it as a quick daily check-in.
+          </p>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {moods.map((mood) => {
             const isSelected = mood.id === selectedMood.id;
@@ -38,10 +48,10 @@ export function MoodTrackerCard({
             return (
               <button
                 key={mood.id}
-                className={`rounded-[24px] border px-4 py-4 text-left transition duration-300 ${
+                className={`rounded-[22px] border px-4 py-4 text-left transition duration-200 ${
                   isSelected
-                    ? "border-violet-200 bg-[linear-gradient(135deg,rgba(245,239,255,0.96),rgba(255,255,255,0.82))] shadow-[0_16px_30px_rgba(132,110,171,0.16)] dark:border-violet-400/20 dark:bg-violet-400/12"
-                    : "border-white/80 bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:border-white/10 dark:bg-white/5"
+                    ? "border-violet-200 bg-[linear-gradient(135deg,rgba(245,239,255,0.92),rgba(255,255,255,0.88))] shadow-[0_10px_22px_rgba(132,110,171,0.12)] dark:border-violet-400/20 dark:bg-[linear-gradient(135deg,rgba(62,45,92,0.78),rgba(15,23,42,0.96))] dark:text-violet-50 dark:shadow-[0_10px_22px_rgba(7,12,26,0.30)]"
+                    : "border-white/80 bg-white/88 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-white/10 dark:bg-white/6"
                 }`}
                 onClick={() => setSelectedMood(mood)}
                 type="button"
@@ -73,8 +83,8 @@ export function MoodTrackerCard({
                 {selectedMood.label} is enough information for now.
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Try one shorter block, softer expectations, and a tiny win before
-                you judge the whole day.
+                Try one shorter block, softer expectations, and one clear next step
+                before you judge the whole day.
               </p>
             </div>
           </div>
@@ -89,7 +99,9 @@ export function MoodTrackerCard({
             {isAuthenticated ? "Save check-in" : "Sign in to save check-in"}
           </Button>
           <p className="text-sm text-slate-500 dark:text-slate-300">
-            Latest saved rhythm: {history.at(-1)?.label ?? "No entries yet"}.
+            {showSample
+              ? `Latest sample rhythm: ${history.at(-1)?.label ?? "No entries yet"}.`
+              : `Latest check-in: ${history.at(-1)?.label ?? "No entries yet"}.`}
           </p>
         </div>
 
@@ -110,6 +122,11 @@ export function MoodTrackerCard({
               </p>
             </div>
           ))}
+          {history.length === 0 ? (
+            <div className="ui-subpanel sm:col-span-3 p-4 text-sm leading-6 text-slate-500 dark:text-slate-300">
+              Blank view is active. Mood history will stay empty until you log your own check-ins.
+            </div>
+          ) : null}
         </div>
       </div>
     </DashboardCard>

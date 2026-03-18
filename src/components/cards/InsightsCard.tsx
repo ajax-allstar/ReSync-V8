@@ -5,25 +5,36 @@ import type { InsightBar, MoodLog } from "../../types/dashboard";
 type InsightsCardProps = {
   bars: InsightBar[];
   moods: MoodLog[];
+  showSample: boolean;
 };
 
-export function InsightsCard({ bars, moods }: InsightsCardProps) {
+export function InsightsCard({ bars, moods, showSample }: InsightsCardProps) {
   const totalHours = bars.reduce((sum, item) => sum + item.hours, 0);
   const focusAverage = (totalHours / bars.length).toFixed(1);
-  const moodAverage = Math.round(
-    moods.reduce((sum, item) => sum + item.score, 0) / moods.length,
-  );
+  const moodAverage = moods.length > 0
+    ? Math.round(moods.reduce((sum, item) => sum + item.score, 0) / moods.length)
+    : 0;
 
   return (
     <DashboardCard
       accent="sage"
       category="Insights"
-      description="Clear progress signals without turning your week into a guilt machine."
+      description="Review weekly focus time, mood patterns, and momentum in one place."
       eyebrow="Weekly Insights"
       surface="solid"
-      title="Your effort is starting to look stable"
+      title="Understand your study patterns at a glance"
     >
       <div className="ui-subpanel border-emerald-100/80 p-5 dark:border-emerald-400/10">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <p className="ui-demo-label">
+            {showSample ? "Demo weekly data" : "Blank insights"}
+          </p>
+          <p className="text-sm text-slate-500 dark:text-slate-300">
+            {showSample
+              ? "Starter numbers show what each chart and score is measuring."
+              : "Blank mode keeps the charts and scores at zero until real activity appears."}
+          </p>
+        </div>
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-[24px] border border-emerald-100/70 bg-emerald-50/85 p-4 dark:border-emerald-400/10 dark:bg-emerald-400/10">
             <p className="text-sm text-slate-500 dark:text-slate-300">
@@ -64,7 +75,7 @@ export function InsightsCard({ bars, moods }: InsightsCardProps) {
                 <div key={bar.day} className="flex flex-1 flex-col items-center gap-3">
                   <div className="flex h-full w-full items-end rounded-full bg-slate-100 p-1 dark:bg-white/5">
                     <div
-                      className="w-full rounded-full bg-[linear-gradient(180deg,#94b89f,#537766)]"
+                      className="w-full rounded-full bg-[linear-gradient(180deg,#96b79f,#5d7f6b)]"
                       style={{ height: `${(bar.hours / 4.5) * 100}%` }}
                     />
                   </div>

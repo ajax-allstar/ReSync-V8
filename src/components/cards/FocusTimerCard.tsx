@@ -1,11 +1,11 @@
 import { Pause, Play, RotateCcw, TimerReset } from "lucide-react";
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
 import { DashboardCard } from "../DashboardCard";
 import type { TimerPreset } from "../../types/dashboard";
 
 type FocusTimerCardProps = {
   presets: TimerPreset[];
+  showSample: boolean;
 };
 
 function formatSeconds(totalSeconds: number) {
@@ -17,12 +17,20 @@ function formatSeconds(totalSeconds: number) {
   return `${minutes}:${seconds}`;
 }
 
-export function FocusTimerCard({ presets }: FocusTimerCardProps) {
-  const [selectedPreset, setSelectedPreset] = useState<TimerPreset>(presets[1]);
+export function FocusTimerCard({ presets, showSample }: FocusTimerCardProps) {
+  const [selectedPreset, setSelectedPreset] = useState<TimerPreset | null>(
+    showSample ? presets[1] : null,
+  );
   const [secondsRemaining, setSecondsRemaining] = useState(
-    presets[1].minutes * 60,
+    showSample ? presets[1].minutes * 60 : 0,
   );
   const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    setIsRunning(false);
+    setSelectedPreset(showSample ? presets[1] : null);
+    setSecondsRemaining(showSample ? presets[1].minutes * 60 : 0);
+  }, [presets, showSample]);
 
   useEffect(() => {
     if (!isRunning) {
@@ -43,8 +51,10 @@ export function FocusTimerCard({ presets }: FocusTimerCardProps) {
     return () => window.clearInterval(timer);
   }, [isRunning]);
 
-  const totalSeconds = selectedPreset.minutes * 60;
-  const progress = ((totalSeconds - secondsRemaining) / totalSeconds) * 100;
+  const totalSeconds = selectedPreset?.minutes ? selectedPreset.minutes * 60 : 0;
+  const progress = totalSeconds > 0
+    ? ((totalSeconds - secondsRemaining) / totalSeconds) * 100
+    : 0;
 
   function changePreset(preset: TimerPreset) {
     setSelectedPreset(preset);
@@ -56,30 +66,35 @@ export function FocusTimerCard({ presets }: FocusTimerCardProps) {
     <DashboardCard
       accent="sage"
       category="Focus"
-      description="Pick the right pace for the study block you actually have energy for."
-      eyebrow="Focus Timer"
+      description="Start a focused study session with simple presets and short-break pacing."
+      eyebrow="Pomodoro Timer"
       surface="glass"
-      title="Stay with one calm sprint"
+      title="Start one clear study sprint"
     >
       <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="ui-subpanel-glass border-emerald-100/90 p-5 dark:border-emerald-400/10">
           <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-300">
-            <span>{selectedPreset.label}</span>
-            <span>{selectedPreset.vibe}</span>
+            <span>{selectedPreset?.label ?? "No preset selected"}</span>
+            <span>{selectedPreset?.vibe ?? "blank start"}</span>
           </div>
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            {showSample
+              ? "Example timer presets help first-time users understand how a focus session is structured."
+              : "Blank mode starts at zero. Pick a preset when you want to load a study timer."}
+          </p>
 
           <div className="mt-6">
-            <div className="relative mx-auto grid h-52 w-52 place-items-center rounded-full border border-emerald-100 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.95),rgba(225,241,231,0.9))] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] dark:border-emerald-400/10 dark:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),rgba(38,58,52,0.85))]">
+            <div className="relative mx-auto grid h-52 w-52 place-items-center rounded-full border border-emerald-100 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.98),rgba(233,243,236,0.92))] shadow-[inset_0_1px_0_rgba(255,255,255,0.84)] dark:border-emerald-400/10 dark:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),rgba(38,58,52,0.82))]">
               <div
                 className="absolute inset-3 rounded-full border border-white/80 dark:border-white/10"
                 style={{
-                  background: `conic-gradient(from 180deg, rgba(127, 176, 143, 0.95) ${progress}%, rgba(223, 232, 225, 0.55) ${progress}% 100%)`,
+                  background: `conic-gradient(from 180deg, rgba(127, 176, 143, 0.88) ${progress}%, rgba(223, 232, 225, 0.5) ${progress}% 100%)`,
                 }}
               />
-              <div className="absolute inset-6 rounded-full bg-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] dark:bg-slate-950" />
+              <div className="absolute inset-6 rounded-full bg-white/94 shadow-[inset_0_1px_0_rgba(255,255,255,0.84)] dark:bg-slate-950" />
               <div className="relative text-center">
-                <p className="text-xs font-semibold tracking-[0.22em] text-slate-400 uppercase">
-                  Active session
+                <p className="ui-demo-label">
+                  {showSample ? "Sample session" : "Blank timer"}
                 </p>
                 <p
                   aria-live="polite"
@@ -89,7 +104,9 @@ export function FocusTimerCard({ presets }: FocusTimerCardProps) {
                   {formatSeconds(secondsRemaining)}
                 </p>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-300">
-                  {secondsRemaining === 0
+                  {selectedPreset === null
+                    ? "Select a preset to load the timer."
+                    : secondsRemaining === 0
                     ? "Session complete. Reset or choose another pace."
                     : isRunning
                       ? "Deep breath, stay here."
@@ -102,7 +119,12 @@ export function FocusTimerCard({ presets }: FocusTimerCardProps) {
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               className="ui-button-primary px-4 py-2.5"
+              disabled={selectedPreset === null}
               onClick={() => {
+                if (!selectedPreset) {
+                  return;
+                }
+
                 if (secondsRemaining === 0) {
                   setSecondsRemaining(totalSeconds);
                   setIsRunning(true);
@@ -118,7 +140,12 @@ export function FocusTimerCard({ presets }: FocusTimerCardProps) {
             </button>
             <button
               className="ui-button-secondary px-4 py-2.5"
+              disabled={selectedPreset === null}
               onClick={() => {
+                if (!selectedPreset) {
+                  return;
+                }
+
                 setSecondsRemaining(totalSeconds);
                 setIsRunning(false);
               }}
@@ -131,32 +158,36 @@ export function FocusTimerCard({ presets }: FocusTimerCardProps) {
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-300">
-            Pomodoro presets
-          </p>
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-300">
+              Session presets
+            </p>
+            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              Choose a timer length based on the kind of work you want to do next.
+            </p>
+          </div>
           {presets.map((preset) => {
-            const isActive = preset.id === selectedPreset.id;
+            const isActive = preset.id === selectedPreset?.id;
 
             return (
-              <motion.button
+              <button
                 key={preset.id}
-                className={`flex w-full items-center justify-between rounded-[24px] border px-4 py-4 text-left transition duration-300 ${
+                className={`flex w-full items-center justify-between rounded-[22px] border px-4 py-4 text-left transition duration-200 ${
                   isActive
-                    ? "border-emerald-200 bg-[linear-gradient(135deg,rgba(236,247,240,0.95),rgba(255,255,255,0.8))] text-slate-950 shadow-[0_14px_30px_rgba(97,135,110,0.12)] dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-white"
-                    : "border-white/80 bg-white/78 text-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+                    ? "border-emerald-200 bg-[linear-gradient(135deg,rgba(236,247,240,0.92),rgba(255,255,255,0.86))] text-slate-950 shadow-[0_10px_22px_rgba(97,135,110,0.10)] dark:border-emerald-400/20 dark:bg-[linear-gradient(135deg,rgba(24,60,49,0.78),rgba(15,23,42,0.96))] dark:text-emerald-50 dark:shadow-[0_10px_22px_rgba(7,12,26,0.30)]"
+                    : "border-white/80 bg-white/86 text-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
                 }`}
                 onClick={() => changePreset(preset)}
                 type="button"
-                whileHover={{ x: 4 }}
               >
                 <div>
                   <p className="font-medium">{preset.label}</p>
                   <p className="mt-1 text-sm opacity-70">{preset.vibe}</p>
                 </div>
-                <div className="rounded-2xl bg-white/80 p-2 dark:bg-white/10">
+                <div className="rounded-2xl bg-white/85 p-2 dark:bg-white/10">
                   <TimerReset size={18} />
                 </div>
-              </motion.button>
+              </button>
             );
           })}
         </div>

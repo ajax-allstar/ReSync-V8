@@ -54,7 +54,7 @@ export function Modal({
       aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined}
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 px-3 py-3 backdrop-blur-[2px] sm:items-center sm:px-6"
       role="dialog"
     >
       <button
@@ -63,7 +63,7 @@ export function Modal({
         onClick={onClose}
         type="button"
       />
-      <div className="ui-panel relative z-10 flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px]">
+      <div className="ui-panel relative z-10 flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px]">
         <div className="flex items-start justify-between gap-4 border-b border-white/60 px-5 py-5 dark:border-white/10 sm:px-6">
           <div>
             <h2

@@ -39,7 +39,7 @@ export function Avatar({
     <div
       aria-hidden="true"
       className={[
-        "grid place-items-center overflow-hidden rounded-2xl border border-white/70 bg-[linear-gradient(145deg,rgba(202,183,255,0.95),rgba(255,226,203,0.92))] font-semibold text-slate-700 shadow-[0_18px_30px_rgba(128,108,149,0.18)] dark:border-white/10 dark:bg-[linear-gradient(145deg,rgba(127,107,176,0.9),rgba(131,89,78,0.92))] dark:text-white",
+        "grid place-items-center overflow-hidden rounded-2xl border border-white/75 bg-[linear-gradient(145deg,rgba(202,183,255,0.88),rgba(255,226,203,0.9))] font-semibold text-slate-700 shadow-[0_10px_22px_rgba(128,108,149,0.14)] dark:border-white/10 dark:bg-[linear-gradient(145deg,rgba(127,107,176,0.76),rgba(131,89,78,0.8))] dark:text-white",
         sizeClasses[size],
         className,
       ].join(" ")}

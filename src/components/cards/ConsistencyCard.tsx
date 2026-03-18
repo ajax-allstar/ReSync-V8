@@ -4,22 +4,26 @@ import type { ConsistencyBeat } from "../../types/dashboard";
 
 type ConsistencyCardProps = {
   beats: ConsistencyBeat[];
+  showSample: boolean;
 };
 
-export function ConsistencyCard({ beats }: ConsistencyCardProps) {
+export function ConsistencyCard({ beats, showSample }: ConsistencyCardProps) {
   return (
     <DashboardCard
       accent="violet"
       category="Insights"
-      description="A softer way to measure consistency than just counting perfect days."
+      description="Track which study habits are becoming easier to repeat across the week."
       eyebrow="Consistency Tracker"
       surface="glass"
-      title="Small repeats are becoming reliable"
+      title="See which routines are starting to stick"
     >
       <div className="ui-subpanel-glass border-violet-100/80 p-5 dark:border-violet-400/10">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-300">
+            <p className="ui-demo-label">
+              {showSample ? "Sample data" : "Blank consistency"}
+            </p>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-300">
               Current streak
             </p>
             <p className="mt-2 font-display text-4xl text-slate-950 dark:text-white">
@@ -49,7 +53,7 @@ export function ConsistencyCard({ beats }: ConsistencyCardProps) {
               </div>
               <div className="h-2 rounded-full bg-violet-100 dark:bg-violet-400/10">
                 <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,#c8b7ff,#8a73bd)]"
+                  className="h-full rounded-full bg-[linear-gradient(90deg,#cbbcf5,#9079bd)]"
                   style={{ width: `${beat.value}%` }}
                 />
               </div>

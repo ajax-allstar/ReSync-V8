@@ -1,6 +1,5 @@
 import { useDeferredValue, useEffect, useState, startTransition } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, LockKeyhole, UserRound } from "lucide-react";
 import { AccountModal } from "./components/AccountModal";
 import { AppHeader } from "./components/AppHeader";
@@ -50,18 +49,19 @@ import type {
 
 const themeStorageKey = "resync-theme";
 const calmModeStorageKey = "resync-calm-mode";
+const sampleModeStorageKey = "resync-show-samples";
 
 const summaryAccentClasses = {
   sage:
-    "bg-[linear-gradient(135deg,rgba(232,244,236,0.8),rgba(255,255,255,0.76))] text-emerald-950 dark:bg-[linear-gradient(135deg,rgba(37,71,56,0.42),rgba(15,23,42,0.72))] dark:text-emerald-50",
+    "bg-[linear-gradient(135deg,rgba(236,246,239,0.94),rgba(255,255,255,0.9))] text-emerald-950 dark:bg-[linear-gradient(135deg,rgba(37,71,56,0.26),rgba(15,23,42,0.84))] dark:text-emerald-50",
   peach:
-    "bg-[linear-gradient(135deg,rgba(255,237,222,0.82),rgba(255,255,255,0.76))] text-orange-950 dark:bg-[linear-gradient(135deg,rgba(96,57,38,0.42),rgba(15,23,42,0.72))] dark:text-orange-50",
+    "bg-[linear-gradient(135deg,rgba(255,240,227,0.94),rgba(255,255,255,0.9))] text-orange-950 dark:bg-[linear-gradient(135deg,rgba(96,57,38,0.26),rgba(15,23,42,0.84))] dark:text-orange-50",
   violet:
-    "bg-[linear-gradient(135deg,rgba(241,234,255,0.82),rgba(255,255,255,0.76))] text-violet-950 dark:bg-[linear-gradient(135deg,rgba(76,56,108,0.42),rgba(15,23,42,0.72))] dark:text-violet-50",
+    "bg-[linear-gradient(135deg,rgba(245,240,255,0.94),rgba(255,255,255,0.9))] text-violet-950 dark:bg-[linear-gradient(135deg,rgba(76,56,108,0.24),rgba(15,23,42,0.84))] dark:text-violet-50",
   sky:
-    "bg-[linear-gradient(135deg,rgba(231,242,255,0.82),rgba(255,255,255,0.76))] text-sky-950 dark:bg-[linear-gradient(135deg,rgba(43,74,96,0.42),rgba(15,23,42,0.72))] dark:text-sky-50",
+    "bg-[linear-gradient(135deg,rgba(236,245,255,0.94),rgba(255,255,255,0.9))] text-sky-950 dark:bg-[linear-gradient(135deg,rgba(43,74,96,0.24),rgba(15,23,42,0.84))] dark:text-sky-50",
   gold:
-    "bg-[linear-gradient(135deg,rgba(255,245,216,0.82),rgba(255,255,255,0.76))] text-amber-950 dark:bg-[linear-gradient(135deg,rgba(104,75,18,0.42),rgba(15,23,42,0.72))] dark:text-amber-50",
+    "bg-[linear-gradient(135deg,rgba(255,248,225,0.94),rgba(255,255,255,0.9))] text-amber-950 dark:bg-[linear-gradient(135deg,rgba(104,75,18,0.24),rgba(15,23,42,0.84))] dark:text-amber-50",
 } as const;
 
 const sectionFilters: Record<HeaderSection, CardCategory> = {
@@ -115,24 +115,22 @@ function readStoredCalmMode() {
   return window.localStorage.getItem(calmModeStorageKey) === "true";
 }
 
+function readStoredSampleMode() {
+  if (typeof window === "undefined") {
+    return true;
+  }
+
+  const storedValue = window.localStorage.getItem(sampleModeStorageKey);
+
+  return storedValue ? storedValue === "true" : true;
+}
+
 function getDashboardStorageKey(userId?: string) {
   return `resync-dashboard-state:${userId ?? "guest"}`;
 }
 
 function isHeaderSection(value: string): value is HeaderSection {
   return sectionIds.includes(value as HeaderSection);
-}
-
-function getMoodLabel(average: number) {
-  if (average >= 75) {
-    return "Steady";
-  }
-
-  if (average >= 60) {
-    return "Mixed";
-  }
-
-  return "Needs care";
 }
 
 function getSectionForFilter(filter: CardCategory): HeaderSection {
@@ -175,6 +173,18 @@ function formatTodayLabel() {
   return new Intl.DateTimeFormat("en-US", {
     weekday: "short",
   }).format(new Date());
+}
+
+function formatMinutesAsDuration(totalMinutes: number) {
+  const safeMinutes = Math.max(0, totalMinutes);
+  const hours = Math.floor(safeMinutes / 60);
+  const minutes = safeMinutes % 60;
+
+  if (hours === 0) {
+    return `${minutes}m`;
+  }
+
+  return `${hours}h ${minutes}m`;
 }
 
 function readStoredDashboardState(storageKey: string): PersistedDashboardState {
@@ -229,6 +239,7 @@ export default function App() {
 
   const [isDark, setIsDark] = useState(readStoredTheme);
   const [isCalmMode, setIsCalmMode] = useState(readStoredCalmMode);
+  const [showSamples, setShowSamples] = useState(readStoredSampleMode);
   const [activeSection, setActiveSection] = useState<HeaderSection>("dashboard");
   const [activeFilter, setActiveFilter] = useState<CardCategory>("All");
   const deferredFilter = useDeferredValue(activeFilter);
@@ -258,51 +269,97 @@ export default function App() {
 
   const userId = session?.user.id;
   const dashboardStorageKey = getDashboardStorageKey(userId);
-  const completedTaskCount = tasks.filter((task) => task.completed).length;
-  const moodAverage = Math.round(
-    moodLogs.reduce((sum, item) => sum + item.score, 0) / moodLogs.length,
+  const isAuthenticated = Boolean(session?.user);
+  const sampleStatsLabel = showSamples
+    ? isAuthenticated
+      ? "Starter data"
+      : "Demo stats"
+    : "Blank view";
+  const displayTasks = showSamples ? tasks : [];
+  const displayMoodLogs = showSamples ? moodLogs : [];
+  const displayWeeklyInsights = showSamples
+    ? weeklyInsights
+    : weeklyInsights.map((item) => ({
+        ...item,
+        hours: 0,
+      }));
+  const displayExamMilestones = showSamples
+    ? examMilestones
+    : examMilestones.map((milestone) => ({
+        ...milestone,
+        readiness: 0,
+        status: "No starter milestone loaded yet.",
+      }));
+  const displayConsistencyBeats = showSamples
+    ? consistencyBeats
+    : consistencyBeats.map((beat) => ({
+        ...beat,
+        value: 0,
+      }));
+  const displayStudyPlanPreviews = showSamples
+    ? studyPlanPreviews
+    : [
+        {
+          breaks: "0 min",
+          duration: "0 min",
+          focus: "Turn on starter examples to preview a guided study plan.",
+          id: "blank-plan",
+          note: "Blank mode keeps the planner clean until you want sample guidance.",
+          subject: "No sample plan loaded",
+        },
+      ];
+  const completedTaskCount = displayTasks.filter((task) => task.completed).length;
+  const moodAverage = displayMoodLogs.length > 0
+    ? Math.round(
+        displayMoodLogs.reduce((sum, item) => sum + item.score, 0) /
+          displayMoodLogs.length,
+      )
+    : 0;
+  const todaysFocusMinutes = Math.round(
+    (displayWeeklyInsights.at(-1)?.hours ?? 0) * 60,
   );
-  const focusHours = weeklyInsights.reduce((sum, item) => sum + item.hours, 0);
   const quickStats: QuickStat[] = [
     {
       accent: "sage",
-      change: `+${weeklyInsights.at(-1)?.hours.toFixed(1) ?? "0.0"}h`,
-      detail: "tap to jump into a focus sprint",
+      change: showSamples ? "Sample" : "Zeroed",
+      detail: showSamples
+        ? "Open the timer to preview focus sessions and short breaks."
+        : "Blank mode starts the timer at zero until you choose a preset.",
       id: "focus-hours",
-      label: "Focus hours",
-      value: `${focusHours.toFixed(1)}h`,
+      label: "Focus time today",
+      value: formatMinutesAsDuration(todaysFocusMinutes),
     },
     {
       accent: "peach",
-      change: `${Math.round((completedTaskCount / tasks.length) * 100)}%`,
-      detail:
-        completedTaskCount === tasks.length
-          ? "all study actions checked off"
-          : `${tasks.length - completedTaskCount} task${
-              tasks.length - completedTaskCount === 1 ? "" : "s"
-            } left`,
+      change: showSamples ? "Sample" : "Zeroed",
+      detail: showSamples
+        ? "Preview the example checklist and today's priorities."
+        : "Blank mode hides starter tasks so you can begin from zero.",
       id: "tasks",
       label: "Tasks completed",
-      value: `${completedTaskCount}/${tasks.length}`,
+      value: showSamples ? `${completedTaskCount} of ${displayTasks.length}` : "0",
     },
     {
       accent: "violet",
-      change: `${moodAverage}%`,
-      detail: "tap to review mood support",
+      change: showSamples ? "Sample" : "Zeroed",
+      detail: showSamples
+        ? "See how quick mood check-ins and recent patterns are shown."
+        : "Blank mode clears starter mood data until you log your own.",
       id: "mood",
-      label: "Mood average",
-      value: getMoodLabel(moodAverage),
+      label: "Mood score",
+      value: `${Math.round(moodAverage / 10)}/10`,
     },
     {
       accent: "sky",
-      change: "+3",
-      detail: "tap to review weekly momentum",
+      change: showSamples ? "Starter" : "Zeroed",
+      detail: showSamples
+        ? "Review how weekly habits and small wins build momentum."
+        : "Blank mode removes the starter streak and consistency cues.",
       id: "streak",
-      label: "Consistency streak",
-      value: "9 days",
+      label: "Weekly streak",
+      value: showSamples ? "9 days" : "0 days",
     },
   ];
-  const isAuthenticated = Boolean(session?.user);
   const displayName = getDisplayName(session?.user ?? null, profile);
   const avatarUrl = getAvatarUrl(session?.user ?? null, profile);
 
@@ -380,6 +437,10 @@ export default function App() {
     document.documentElement.classList.toggle("calm-mode", isCalmMode);
     window.localStorage.setItem(calmModeStorageKey, String(isCalmMode));
   }, [isCalmMode]);
+
+  useEffect(() => {
+    window.localStorage.setItem(sampleModeStorageKey, String(showSamples));
+  }, [showSamples]);
 
   useEffect(() => {
     if (!supabase) {
@@ -623,7 +684,7 @@ export default function App() {
 
   function handleResetTasks() {
     setTasks(todaysTasks);
-    showToast("Task checklist reset.", "info");
+    showToast("Sample checklist restored.", "info");
   }
 
   async function handleSaveMood(mood: MoodOption) {
@@ -720,7 +781,7 @@ export default function App() {
   const cards = [
     {
       category: "Focus" as const,
-      component: <FocusTimerCard presets={timerPresets} />,
+      component: <FocusTimerCard presets={timerPresets} showSample={showSamples} />,
       id: "focus-timer",
     },
     {
@@ -729,6 +790,7 @@ export default function App() {
         <TaskPlannerCard
           onResetTasks={handleResetTasks}
           onToggleTask={handleToggleTask}
+          showSample={showSamples}
           tasks={tasks}
         />
       ),
@@ -738,11 +800,12 @@ export default function App() {
       category: "Mood" as const,
       component: (
         <MoodTrackerCard
-          history={moodLogs}
+          history={displayMoodLogs}
           isAuthenticated={isAuthenticated}
           isSaving={isMoodSaving}
           moods={moodOptions}
           onSaveMood={handleSaveMood}
+          showSample={showSamples}
         />
       ),
       id: "mood-tracker",
@@ -752,7 +815,8 @@ export default function App() {
       component: (
         <StudyPlanCard
           onApplyPlan={handleApplyPlan}
-          plans={studyPlanPreviews}
+          plans={displayStudyPlanPreviews}
+          showSample={showSamples}
         />
       ),
       id: "study-plan",
@@ -764,17 +828,33 @@ export default function App() {
     },
     {
       category: "Insights" as const,
-      component: <InsightsCard bars={weeklyInsights} moods={moodLogs} />,
+      component: (
+        <InsightsCard
+          bars={displayWeeklyInsights}
+          moods={displayMoodLogs}
+          showSample={showSamples}
+        />
+      ),
       id: "insights-card",
     },
     {
       category: "Planner" as const,
-      component: <ExamPrepCard milestones={examMilestones} />,
+      component: (
+        <ExamPrepCard
+          milestones={displayExamMilestones}
+          showSample={showSamples}
+        />
+      ),
       id: "exam-prep",
     },
     {
       category: "Insights" as const,
-      component: <ConsistencyCard beats={consistencyBeats} />,
+      component: (
+        <ConsistencyCard
+          beats={displayConsistencyBeats}
+          showSample={showSamples}
+        />
+      ),
       id: "consistency",
     },
   ];
@@ -785,13 +865,9 @@ export default function App() {
       : cards.filter((card) => card.category === deferredFilter);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(255,231,215,0.86),transparent_24%),radial-gradient(circle_at_top_right,rgba(213,229,219,0.82),transparent_26%),linear-gradient(180deg,#f8f3ec_0%,#f4efe6_36%,#fbf8f4_100%)] text-slate-950 transition-colors duration-300 dark:bg-[radial-gradient(circle_at_top_left,rgba(120,80,67,0.32),transparent_20%),radial-gradient(circle_at_top_right,rgba(76,102,96,0.32),transparent_20%),linear-gradient(180deg,#111827_0%,#0f172a_60%,#0b1220_100%)] dark:text-white">
-      <div className="pointer-events-none fixed inset-0 opacity-60">
-        <div className="absolute left-[6%] top-16 h-40 w-40 rounded-full bg-orange-200/45 blur-3xl dark:bg-orange-500/10" />
-        <div className="absolute right-[10%] top-20 h-44 w-44 rounded-full bg-emerald-200/45 blur-3xl dark:bg-emerald-500/10" />
-        <div className="absolute bottom-24 left-[24%] h-52 w-52 rounded-full bg-violet-200/35 blur-3xl dark:bg-violet-500/10" />
-      </div>
-      <div className="pointer-events-none fixed inset-x-0 top-0 h-40 bg-[linear-gradient(180deg,rgba(255,255,255,0.18),transparent)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent)]" />
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f8f3ec_0%,#f5efe7_42%,#fbf8f4_100%)] text-slate-950 transition-colors duration-200 dark:bg-[linear-gradient(180deg,#111827_0%,#0f172a_56%,#0b1220_100%)] dark:text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,231,215,0.52),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(213,229,219,0.42),transparent_28%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(120,80,67,0.16),transparent_20%),radial-gradient(circle_at_bottom_right,rgba(76,102,96,0.16),transparent_26%)]" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0.14),transparent)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent)]" />
 
       <AppHeader
         activeSection={activeSection}
@@ -811,16 +887,11 @@ export default function App() {
       />
 
       <main className="relative mx-auto flex max-w-7xl flex-col gap-9 px-4 pb-14 pt-6 sm:px-6 lg:px-8">
-        <motion.section
-          animate={{ opacity: 1, y: 0 }}
+        <section
           className="ui-panel relative isolate overflow-hidden px-6 py-7 sm:px-8 sm:py-8"
           id="dashboard"
-          initial={{ opacity: 0, y: 24 }}
-          transition={{ duration: 0.55, ease: "easeOut" }}
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(255,255,255,0.22),transparent)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent)]" />
-          <div className="pointer-events-none absolute -right-16 top-6 h-44 w-44 rounded-full bg-orange-200/35 blur-3xl dark:bg-orange-400/10" />
-          <div className="pointer-events-none absolute bottom-0 left-10 h-32 w-32 rounded-full bg-emerald-100/50 blur-3xl dark:bg-emerald-400/10" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),transparent)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent)]" />
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div className="relative z-10">
               <div className="ui-chip inline-flex items-center gap-2 px-4 py-2 text-[11px] tracking-[0.26em]">
@@ -837,19 +908,19 @@ export default function App() {
                 )}
               </div>
               <h1 className="mt-5 max-w-3xl font-display text-4xl leading-[1.02] text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
-                Keep your studies moving without letting stress run the day.
+                Plan your studies, protect your focus, and keep stress from taking over.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-300 sm:text-lg">
-                ReSync blends focus support, planning, mood awareness, and exam
-                preparation into one student-first dashboard that feels calm,
-                motivating, and ready for real daily use.
+                ReSync brings together a pomodoro timer, study planning, mood
+                check-ins, and weekly insight cards in one calm student dashboard.
               </p>
-              {!isAuthenticated ? (
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-500 dark:text-slate-300">
-                  Sign in to sync your avatar, profile controls, and saved
-                  account preferences across sessions.
-                </p>
-              ) : null}
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-500 dark:text-slate-300">
+                {showSamples
+                  ? isAuthenticated
+                    ? "Starter values stay visible until you begin updating the dashboard with your own rhythm."
+                    : "Demo stats and starter content are shown below so each feature is easy to understand before you customize it."
+                  : "Blank view removes the starter examples and keeps the dashboard at zero until you fill it in."}
+              </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button
                   onClick={handleHeroPrimaryAction}
@@ -867,55 +938,43 @@ export default function App() {
               </div>
             </div>
 
-            <motion.div
-              animate={{ opacity: 1, scale: 1 }}
-              className="grid gap-4 sm:grid-cols-2"
-              initial={{ opacity: 0, scale: 0.96 }}
-              transition={{ delay: 0.18, duration: 0.45, ease: "easeOut" }}
-            >
-              {quickStats.map((stat, index) => (
-                <motion.div
+            <div className="grid gap-4 sm:grid-cols-2">
+              {quickStats.map((stat) => (
+                <QuickStatCard
+                  badgeLabel={sampleStatsLabel}
+                  isActive={isQuickStatActive(stat.id)}
                   key={stat.id}
-                  animate={{ opacity: 1, y: 0 }}
-                  initial={{ opacity: 0, y: 18 }}
-                  transition={{ delay: 0.12 + index * 0.06, duration: 0.35 }}
-                >
-                  <QuickStatCard
-                    isActive={isQuickStatActive(stat.id)}
-                    onClick={() => handleQuickStatAction(stat.id)}
-                    stat={stat}
-                  />
-                </motion.div>
+                  onClick={() => handleQuickStatAction(stat.id)}
+                  stat={stat}
+                />
               ))}
-            </motion.div>
+            </div>
           </div>
-        </motion.section>
+        </section>
 
-        <section className="grid gap-4 md:grid-cols-4">
-          {quickStats.map((stat, index) => (
-            <motion.button
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {quickStats.map((stat) => (
+            <button
               key={`${stat.id}-summary`}
-              animate={{ opacity: 1, y: 0 }}
-              className={`ui-hover-lift relative overflow-hidden rounded-[28px] border border-white/70 p-5 text-left shadow-[0_20px_50px_rgba(110,91,75,0.09)] backdrop-blur-xl dark:border-white/10 ${summaryAccentClasses[stat.accent]}`}
-              initial={{ opacity: 0, y: 18 }}
+              className={`ui-hover-lift relative overflow-hidden rounded-[26px] border border-white/75 p-5 text-left shadow-[0_14px_28px_rgba(110,91,75,0.08)] backdrop-blur-sm dark:border-white/10 ${summaryAccentClasses[stat.accent]}`}
               onClick={() => handleQuickStatAction(stat.id)}
-              transition={{ delay: 0.24 + index * 0.06, duration: 0.35 }}
               type="button"
             >
-              <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent dark:via-white/25" />
-              <p className="ui-kicker">{stat.label}</p>
+              <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/85 to-transparent dark:via-white/20" />
+              <p className="ui-demo-label">{sampleStatsLabel}</p>
+              <p className="mt-2 ui-kicker">{stat.label}</p>
               <div className="mt-4 flex items-end justify-between gap-3">
                 <p className="font-display text-4xl text-slate-950 dark:text-white">
                   {stat.value}
                 </p>
-                <p className="rounded-full bg-white/60 px-3 py-1 text-sm text-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.56)] dark:bg-white/10 dark:text-slate-200">
+                <p className="rounded-full bg-white/72 px-3 py-1 text-sm text-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.46)] dark:bg-white/10 dark:text-slate-200">
                   {stat.change}
                 </p>
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
                 {stat.detail}
               </p>
-            </motion.button>
+            </button>
           ))}
         </section>
 
@@ -923,17 +982,53 @@ export default function App() {
           className="space-y-5"
           id="focus"
         >
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="grid gap-4 lg:grid-cols-[1fr_20rem] lg:items-start">
             <div>
               <p className="ui-kicker">Dashboard Cards</p>
               <h2 className="mt-2 font-display text-3xl text-slate-950 dark:text-white">
-                Switch between focus, planning, mood, wellness, and insight views
+                Choose the tools you want to see right now
               </h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Filter the dashboard by task type so each feature feels easier to scan and use.
+              </p>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-              Filter the dashboard to match what you need right now instead of
-              staring at everything at once.
-            </p>
+            <div className="ui-subpanel flex flex-col gap-3 p-4">
+              <div>
+                <p className="ui-kicker">Starter Preview</p>
+                <p className="mt-2 text-sm font-medium text-slate-900 dark:text-white">
+                  Do you want a guided sample?
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  Show starter examples for a guided tour, or switch to zeroed cards if you want a cleaner blank start.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  aria-pressed={showSamples}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition duration-200 ${
+                    showSamples
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-900 shadow-[0_8px_18px_rgba(97,135,110,0.10)] dark:border-emerald-400/20 dark:bg-[linear-gradient(135deg,rgba(24,60,49,0.78),rgba(15,23,42,0.96))] dark:text-emerald-50"
+                      : "border-slate-200 bg-white/90 text-slate-600 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
+                  }`}
+                  onClick={() => setShowSamples(true)}
+                  type="button"
+                >
+                  Show sample
+                </button>
+                <button
+                  aria-pressed={!showSamples}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition duration-200 ${
+                    !showSamples
+                      ? "border-sky-200 bg-sky-50 text-sky-900 shadow-[0_8px_18px_rgba(72,114,160,0.10)] dark:border-sky-400/20 dark:bg-[linear-gradient(135deg,rgba(30,53,77,0.78),rgba(15,23,42,0.96))] dark:text-sky-50"
+                      : "border-slate-200 bg-white/90 text-slate-600 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
+                  }`}
+                  onClick={() => setShowSamples(false)}
+                  type="button"
+                >
+                  Start blank
+                </button>
+              </div>
+            </div>
           </div>
 
           <FilterBar
@@ -945,30 +1040,23 @@ export default function App() {
             }}
           />
 
-          <motion.div
-            className="grid gap-5 lg:grid-cols-2"
-            layout
-          >
-            <AnimatePresence mode="popLayout">
-              {visibleCards.map((card) => (
-                <motion.div
-                  key={card.id}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="h-full"
-                  exit={{ opacity: 0, y: 18 }}
-                  initial={{ opacity: 0, y: 18 }}
-                  layout
-                  transition={{ duration: 0.28, ease: "easeOut" }}
-                >
-                  {card.component}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+          <div className="grid gap-5 lg:grid-cols-2">
+            {visibleCards.map((card) => (
+              <div
+                className="h-full"
+                key={card.id}
+              >
+                {card.component}
+              </div>
+            ))}
+          </div>
         </section>
 
         <div className="grid gap-6 xl:grid-cols-[1.18fr_0.82fr]">
-          <ScheduleSection blocks={dailySchedule} />
+          <ScheduleSection
+            blocks={showSamples ? dailySchedule : []}
+            showSample={showSamples}
+          />
 
           <section
             className="ui-panel space-y-6 p-6"
@@ -977,15 +1065,17 @@ export default function App() {
             <div>
               <p className="ui-kicker">Mood / Wellness Area</p>
               <h2 className="mt-3 font-display text-3xl text-slate-950 dark:text-white">
-                Gentle support between study blocks
+                Quick support between study blocks
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                A softer layer for student pressure: recovery cues, stress
-                signals, and low-friction emotional check-ins.
+                Mood check-ins, recovery cues, and starter wellness notes stay visible without competing with the main workflow.
               </p>
             </div>
 
-            <div className="ui-subpanel-glass bg-[linear-gradient(135deg,rgba(243,235,255,0.84),rgba(255,255,255,0.76))] p-5 dark:bg-[linear-gradient(135deg,rgba(118,88,149,0.22),rgba(255,255,255,0.03))]">
+            <div className="ui-subpanel-glass bg-[linear-gradient(135deg,rgba(243,235,255,0.88),rgba(255,255,255,0.86))] p-5 dark:bg-[linear-gradient(135deg,rgba(118,88,149,0.16),rgba(255,255,255,0.03))]">
+              <p className="ui-demo-label">
+                {showSamples ? "Sample data" : "Blank view"}
+              </p>
               <p className="text-sm font-medium text-slate-900 dark:text-white">
                 Today&apos;s recovery note
               </p>
@@ -996,7 +1086,7 @@ export default function App() {
             </div>
 
             <div className="grid gap-4">
-              {moodLogs.slice(-4).map((entry) => (
+              {displayMoodLogs.slice(-4).map((entry) => (
                 <div
                   className="ui-subpanel flex items-center justify-between px-4 py-4"
                   key={entry.day}
@@ -1009,11 +1099,16 @@ export default function App() {
                       {entry.label}
                     </p>
                   </div>
-                  <div className="rounded-full bg-white px-3 py-1 text-sm font-medium text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] dark:bg-white/10 dark:text-white">
+                  <div className="rounded-full bg-white/90 px-3 py-1 text-sm font-medium text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] dark:bg-white/10 dark:text-white">
                     {entry.score}
                   </div>
                 </div>
               ))}
+              {displayMoodLogs.length === 0 ? (
+                <div className="ui-subpanel px-4 py-5 text-sm text-slate-500 dark:text-slate-300">
+                  Blank view is active. Turn on starter examples to preview sample mood history here.
+                </div>
+              ) : null}
             </div>
           </section>
         </div>
@@ -1026,17 +1121,19 @@ export default function App() {
             <div>
               <p className="ui-kicker">Insights Section</p>
               <h2 className="mt-3 font-display text-3xl text-slate-950 dark:text-white">
-                Weekly patterns that help you study with less friction
+                Weekly patterns that help you adjust faster
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-              Focus hours, emotional rhythm, and schedule quality all stay visible
-              in one place so the next adjustment feels obvious.
+              Keep focus time, emotional rhythm, and study quality in view so the next adjustment feels obvious.
             </p>
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             <div className="ui-subpanel p-5">
+              <p className="ui-demo-label">
+                Demo stat
+              </p>
               <p className="text-sm text-slate-500 dark:text-slate-300">
                 Average session quality
               </p>
@@ -1048,6 +1145,9 @@ export default function App() {
               </p>
             </div>
             <div className="ui-subpanel p-5">
+              <p className="ui-demo-label">
+                Demo insight
+              </p>
               <p className="text-sm text-slate-500 dark:text-slate-300">
                 Most effective reset
               </p>
@@ -1059,6 +1159,9 @@ export default function App() {
               </p>
             </div>
             <div className="ui-subpanel p-5">
+              <p className="ui-demo-label">
+                Demo recommendation
+              </p>
               <p className="text-sm text-slate-500 dark:text-slate-300">
                 Recommended tweak
               </p>

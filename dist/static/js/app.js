@@ -26,6 +26,36 @@ const state = {
     activeSection: "dashboard",
 };
 
+const academicChatRejection = "I'm here to help with academic questions and study-related topics only.\nPlease ask something related to your subjects, homework, or exam preparation.";
+const academicChatPolicy = `
+You are the Academic AI Assistant inside the ReSync student productivity platform.
+
+Help students strictly with academic learning, homework, concept clarification, study planning, exam preparation, and research-related study support.
+
+Allowed areas include mathematics, physics, chemistry, biology, computer science, programming, history, geography, economics, literature, languages, engineering basics, environmental science, study techniques, research skills, academic summaries, and homework explanations.
+
+You may help with step-by-step problem solving, simplifying difficult concepts, practice questions, formula explanations, theory explanations, study planning, and breaking down hard topics.
+
+Do not answer non-academic requests such as entertainment, jokes, gossip, celebrity news, gaming discussions, movie recommendations, personal conversations, relationship advice, or unrelated chit-chat.
+
+Do not help with hacking, harmful activity, illegal activity, cheating, plagiarism, or exam dishonesty.
+
+If the user asks a non-academic question, reply with exactly:
+${academicChatRejection}
+`.trim();
+
+function chatPersonaLabel(persona) {
+    return persona === "motivator" ? "Study Coach" : "Subject Tutor";
+}
+
+function chatPersonaPrompt(persona) {
+    const personaInstruction = persona === "motivator"
+        ? "Use a warm, encouraging study-coach tone. Help with study anxiety only in the context of academic work, focus, homework, and exam preparation."
+        : "Use a tutor tone. Explain concepts clearly, give structured academic help, and break problems into steps when helpful.";
+
+    return `${academicChatPolicy}\n\n${personaInstruction}`;
+}
+
 function getActiveTimeZone() {
     return getUserTimeZone(state.profile);
 }
@@ -61,7 +91,7 @@ function renderMarketing() {
             <div>
                 <p class="inline-flex rounded-full border border-sand-300 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-stone-500 animate-fade-in">Welcome to ReSync</p>
                 <h1 class="mt-6 max-w-3xl font-serif text-5xl leading-tight text-ink sm:text-6xl animate-fade-in-up stagger-1">A calmer study rhythm.</h1>
-                <p class="mt-6 max-w-2xl text-lg leading-8 text-stone-600 animate-fade-in-up stagger-2">Plan your studies, track your mood, and focus with AI companions to keep your learning journey stress-free.</p>
+                <p class="mt-6 max-w-2xl text-lg leading-8 text-stone-600 animate-fade-in-up stagger-2">Plan your studies, track your mood, and get academic help for homework, concepts, and exam preparation.</p>
                 <div class="mt-8 flex flex-wrap gap-4 animate-fade-in-up stagger-3">
                     <button class="rounded-full bg-moss-700 px-6 py-3 font-semibold text-white shadow-paper transition active:scale-95 hover:bg-moss-500 hover-lift" data-open-auth="signup">Create your space</button>
                     <button class="rounded-full border border-sand-300 bg-white/90 px-6 py-3 font-semibold transition active:scale-95 hover:border-moss-500 hover:text-moss-700 hover-lift" data-open-auth="login">Sign in</button>
@@ -86,7 +116,7 @@ function renderMarketing() {
         <section id="features" class="mt-16 grid gap-6 md:grid-cols-3">
             <div class="rounded-[2rem] border border-sand-200 bg-white/75 p-6 shadow-sm card-hover animate-fade-in-up stagger-4"><h3 class="text-xl font-semibold text-moss-700">AI Weekly Planner</h3><p class="mt-2 text-sm text-stone-600">Let AI intelligently space out your study sessions for a balanced schedule.</p></div>
             <div class="rounded-[2rem] border border-sand-200 bg-white/75 p-6 shadow-sm card-hover animate-fade-in-up stagger-5"><h3 class="text-xl font-semibold text-moss-700">Interactive Timer</h3><p class="mt-2 text-sm text-stone-600">Customizable Pomodoro timers to help you keep a steady flow.</p></div>
-            <div class="rounded-[2rem] border border-sand-200 bg-white/75 p-6 shadow-sm card-hover animate-fade-in-up stagger-6"><h3 class="text-xl font-semibold text-moss-700">AI Friends</h3><p class="mt-2 text-sm text-stone-600">Get study tips and emotional support right when you need it.</p></div>
+            <div class="rounded-[2rem] border border-sand-200 bg-white/75 p-6 shadow-sm card-hover animate-fade-in-up stagger-6"><h3 class="text-xl font-semibold text-moss-700">Academic AI Assistant</h3><p class="mt-2 text-sm text-stone-600">Ask academic questions, get concept explanations, and prepare for exams.</p></div>
         </section>
         <section id="auth-section" class="mt-16 grid gap-6 lg:grid-cols-[1fr_0.95fr] animate-fade-in-up stagger-6">
             <div class="rounded-[2rem] border border-sand-200 bg-white/80 p-8 shadow-paper">
@@ -388,7 +418,7 @@ function renderSection() {
         timetable: `<div class="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]"><div class="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm">${timetableFormHtml()}</div><div class="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm"><div class="flex items-center justify-between"><h2 class="text-2xl font-semibold">Weekly structure</h2><span id="timetable-count" class="rounded-full bg-sand-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500"></span></div><div id="timetable-list" class="mt-5 grid gap-4 md:grid-cols-2"></div></div></div>`,
         timer: `<div class="grid gap-6 xl:grid-cols-[0.72fr_1.28fr]"><div class="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm">${timerPanelHtml()}</div><div class="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm"><div class="flex items-center justify-between"><h2 class="text-2xl font-semibold">Planned focus blocks</h2><span id="timer-session-count" class="rounded-full bg-sand-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500"></span></div><div id="timer-session-list" class="mt-5 space-y-3"></div></div></div>`,
         mood: `<div class="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]"><div class="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm">${moodFormHtml()}</div><div class="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm"><div class="flex items-center justify-between"><h2 class="text-2xl font-semibold">Recent mood history</h2><span id="mood-count" class="rounded-full bg-sand-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500"></span></div><div id="mood-list" class="mt-5 space-y-3"></div></div></div>`,
-        friends: `<div class="grid gap-6 xl:grid-cols-[0.7fr_1.3fr]" id="friends-container"><div class="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm transition-all" id="friends-sidebar"><h2 class="text-2xl font-semibold">AI Friends</h2><p class="mt-2 text-sm text-stone-600">Choose a companion for your study journey.</p><div class="mt-5 space-y-3"><button class="friend-select-btn w-full rounded-2xl border border-sand-300 bg-white p-4 text-left shadow-sm transition hover:border-moss-500 active:scale-95" data-persona="motivator"><p class="font-semibold text-moss-700">Mental Motivator</p><p class="mt-1 text-xs text-stone-500">Offers encouragement and helps with study anxiety.</p></button><button class="friend-select-btn w-full rounded-2xl border border-sand-300 bg-white p-4 text-left shadow-sm transition hover:border-moss-500 active:scale-95" data-persona="expert"><p class="font-semibold text-moss-700">Study Expert</p><p class="mt-1 text-xs text-stone-500">Helps explain complex topics and study techniques.</p></button></div></div><div class="hidden h-[600px] flex-col rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm" id="chat-area"><div class="flex items-center justify-between border-b border-sand-200 pb-4"><div class="flex items-center gap-3"><button id="back-to-friends" class="rounded-full bg-sand-100 p-2 transition hover:bg-sand-200 active:scale-95">←</button><h2 id="chat-title" class="text-xl font-semibold">Select a friend to chat</h2></div></div><div id="chat-messages" class="flex-1 space-y-4 overflow-y-auto py-4 text-sm"><div class="text-center text-stone-500">Chat history will appear here.</div></div><form id="chat-form" class="mt-4 flex gap-3"><input type="text" id="chat-input" class="flex-1 rounded-full border border-sand-300 bg-white/90 px-4 py-3 text-sm text-stone-700 shadow-sm transition" placeholder="Type a message..." disabled><button type="submit" id="chat-submit" class="rounded-full bg-moss-700 px-6 py-3 text-sm font-semibold text-white transition active:scale-95 disabled:opacity-50" disabled>Send</button></form></div></div>`,
+        friends: `<div class="grid gap-6 xl:grid-cols-[0.7fr_1.3fr]" id="friends-container"><div class="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm transition-all" id="friends-sidebar"><h2 class="text-2xl font-semibold">Academic AI Assistant</h2><p class="mt-2 text-sm text-stone-600">Choose the kind of academic support you need.</p><div class="mt-5 space-y-3"><button class="friend-select-btn w-full rounded-2xl border border-sand-300 bg-white p-4 text-left shadow-sm transition hover:border-moss-500 active:scale-95" data-persona="motivator"><p class="font-semibold text-moss-700">Study Coach</p><p class="mt-1 text-xs text-stone-500">Encouragement and study support for homework, focus, and exam preparation.</p></button><button class="friend-select-btn w-full rounded-2xl border border-sand-300 bg-white p-4 text-left shadow-sm transition hover:border-moss-500 active:scale-95" data-persona="expert"><p class="font-semibold text-moss-700">Subject Tutor</p><p class="mt-1 text-xs text-stone-500">Concept explanations, step-by-step solutions, and study guidance.</p></button></div></div><div class="hidden h-[600px] flex-col rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm" id="chat-area"><div class="flex items-center justify-between border-b border-sand-200 pb-4"><div class="flex items-center gap-3"><button id="back-to-friends" class="rounded-full bg-sand-100 p-2 transition hover:bg-sand-200 active:scale-95">←</button><h2 id="chat-title" class="text-xl font-semibold">Select an academic assistant</h2></div></div><div id="chat-messages" class="flex-1 space-y-4 overflow-y-auto py-4 text-sm"><div class="text-center text-stone-500">Academic chat history will appear here.</div></div><form id="chat-form" class="mt-4 flex gap-3"><input type="text" id="chat-input" class="flex-1 rounded-full border border-sand-300 bg-white/90 px-4 py-3 text-sm text-stone-700 shadow-sm transition" placeholder="Ask about homework, concepts, or exam prep..." disabled><button type="submit" id="chat-submit" class="rounded-full bg-moss-700 px-6 py-3 text-sm font-semibold text-white transition active:scale-95 disabled:opacity-50" disabled>Send</button></form></div></div>`,
         profile: `<div class="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]"><div class="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-sm">${profileFormHtml()}</div></div>`,
     };
 
@@ -911,11 +941,11 @@ function mountChat() {
             if (state.chatPersona !== newPersona) {
                 state.chatHistory = [];
                 state.chatPersona = newPersona;
-                document.querySelector("#chat-messages").innerHTML = `<div class="text-center text-stone-500">Started chat with ${newPersona === "motivator" ? "Mental Motivator" : "Study Expert"}. Say hi!</div>`;
+                document.querySelector("#chat-messages").innerHTML = `<div class="text-center text-stone-500">Started chat with ${chatPersonaLabel(newPersona)}. Ask an academic question to begin.</div>`;
             } else {
                 document.querySelector("#chat-messages").innerHTML = "";
                 if (state.chatHistory.length === 0) {
-                    document.querySelector("#chat-messages").innerHTML = `<div class="text-center text-stone-500">Started chat with ${newPersona === "motivator" ? "Mental Motivator" : "Study Expert"}. Say hi!</div>`;
+                    document.querySelector("#chat-messages").innerHTML = `<div class="text-center text-stone-500">Started chat with ${chatPersonaLabel(newPersona)}. Ask an academic question to begin.</div>`;
                 } else {
                     state.chatHistory.forEach((message) => appendMessage(message.role, message.content));
                 }
@@ -949,9 +979,7 @@ function mountChat() {
         appendMessage("user", message);
         state.chatHistory.push({ role: "user", content: message });
 
-        const systemPrompt = state.chatPersona === "motivator"
-            ? "You are a Mental Motivator for a student. You offer warm, concise encouragement, help them overcome study anxiety, and cheer them on. Keep it brief and friendly."
-            : "You are a Study Expert. You help explain complex topics simply, suggest study techniques, and act as a tutor. Keep it concise, helpful, and clear.";
+        const systemPrompt = chatPersonaPrompt(state.chatPersona);
         const submitButton = document.querySelector("#chat-submit");
 
         submitButton.textContent = "...";

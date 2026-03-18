@@ -27,7 +27,7 @@ export function Toast({
       className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4"
     >
       <div
-        className={`rounded-full border px-4 py-3 text-sm font-medium shadow-[0_18px_40px_rgba(15,23,42,0.14)] ${toneClasses[tone]}`}
+        className={`rounded-full border px-4 py-3 text-sm font-medium shadow-[0_10px_22px_rgba(15,23,42,0.12)] ${toneClasses[tone]}`}
         role="status"
       >
         {message}

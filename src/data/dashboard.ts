@@ -56,7 +56,7 @@ export const quickStats: QuickStat[] = [
 ];
 
 export const timerPresets: TimerPreset[] = [
-  { id: "reset", label: "Reset Sprint", minutes: 15, vibe: "gentle comeback" },
+  { id: "reset", label: "Starter Sprint", minutes: 15, vibe: "gentle comeback" },
   { id: "pomodoro", label: "Pomodoro", minutes: 25, vibe: "classic focus" },
   { id: "deep", label: "Deep Study", minutes: 45, vibe: "exam prep mode" },
   { id: "flow", label: "Flow Hour", minutes: 60, vibe: "project momentum" },

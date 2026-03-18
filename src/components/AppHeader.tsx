@@ -10,7 +10,6 @@ import {
   Wind,
   X,
 } from "lucide-react";
-import { motion } from "motion/react";
 import {
   useEffect,
   useEffectEvent,
@@ -116,7 +115,7 @@ export function AppHeader({
             onClick={() => handleNavigate("dashboard")}
             type="button"
           >
-            <div className="grid h-11 w-11 place-items-center rounded-2xl border border-white/70 bg-[linear-gradient(135deg,rgba(249,221,197,0.95),rgba(217,234,220,0.88))] text-sm font-semibold tracking-[0.2em] text-slate-800 shadow-[0_16px_30px_rgba(124,102,83,0.14)] dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(118,93,83,0.85),rgba(55,84,100,0.88))] dark:text-amber-50">
+            <div className="grid h-11 w-11 place-items-center rounded-2xl border border-white/75 bg-[linear-gradient(135deg,rgba(249,221,197,0.92),rgba(217,234,220,0.85))] text-sm font-semibold tracking-[0.2em] text-slate-800 shadow-[0_10px_20px_rgba(124,102,83,0.12)] dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(118,93,83,0.76),rgba(55,84,100,0.78))] dark:text-amber-50">
               RS
             </div>
             <div className="min-w-0">
@@ -129,16 +128,16 @@ export function AppHeader({
             </div>
           </button>
 
-          <nav className="hidden items-center gap-1 rounded-full border border-white/75 bg-white/62 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.62)] backdrop-blur-lg dark:border-white/10 dark:bg-white/5 md:flex">
+          <nav className="hidden items-center gap-1 rounded-full border border-white/75 bg-white/88 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] backdrop-blur-sm dark:border-white/10 dark:bg-white/6 md:flex">
             {navItems.map((item) => {
               const isActive = item.id === activeSection;
 
               return (
                 <button
                   aria-current={isActive ? "page" : undefined}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition duration-300 ${
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition duration-200 ${
                     isActive
-                      ? "bg-white/88 text-slate-950 shadow-[0_10px_24px_rgba(110,91,75,0.08)] dark:bg-white/10 dark:text-white"
+                      ? "bg-white text-slate-950 shadow-[0_8px_18px_rgba(110,91,75,0.08)] dark:bg-white/10 dark:text-white"
                       : "text-slate-600 hover:bg-white/80 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
                   }`}
                   key={item.id}
@@ -152,16 +151,15 @@ export function AppHeader({
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <motion.button
+            <button
               aria-label="Toggle theme"
               aria-pressed={isDark}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/82 text-slate-600 shadow-[0_16px_32px_rgba(108,92,76,0.1)] transition duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:border-white/15 dark:hover:text-white"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/88 text-slate-600 shadow-[0_10px_20px_rgba(108,92,76,0.08)] transition duration-200 hover:border-slate-300 hover:text-slate-900 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:hover:border-white/15 dark:hover:text-white"
               onClick={onToggleTheme}
               type="button"
-              whileTap={{ scale: 0.96 }}
             >
               {isDark ? <SunMedium size={18} /> : <MoonStar size={18} />}
-            </motion.button>
+            </button>
 
             <Button
               className="hidden sm:inline-flex"
@@ -182,7 +180,7 @@ export function AppHeader({
                   aria-expanded={isProfileMenuOpen}
                   aria-haspopup="menu"
                   aria-label="Open account menu"
-                  className="flex items-center gap-2 rounded-[22px] border border-white/80 bg-white/82 px-2.5 py-2 text-sm font-medium text-slate-700 shadow-[0_16px_28px_rgba(108,92,76,0.1)] transition duration-300 hover:-translate-y-0.5 hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
+                  className="flex items-center gap-2 rounded-[22px] border border-white/80 bg-white/88 px-2.5 py-2 text-sm font-medium text-slate-700 shadow-[0_10px_20px_rgba(108,92,76,0.08)] transition duration-200 hover:border-slate-300 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
                   onClick={() => setIsProfileMenuOpen((current) => !current)}
                   type="button"
                 >
@@ -208,7 +206,7 @@ export function AppHeader({
 
                 {isProfileMenuOpen ? (
                   <div
-                    className="ui-panel-glass absolute right-0 mt-3 w-64 rounded-[28px] p-2"
+                    className="ui-panel-glass absolute right-0 mt-3 w-64 rounded-[24px] p-2"
                     role="menu"
                   >
                     <button
@@ -301,10 +299,10 @@ export function AppHeader({
             <nav className="grid gap-2">
               {navItems.map((item) => (
                 <button
-                  className={`rounded-[22px] px-4 py-3 text-left text-sm font-medium transition ${
+                  className={`rounded-[22px] border px-4 py-3 text-left text-sm font-medium transition duration-200 ${
                     item.id === activeSection
-                      ? "bg-white/85 text-slate-950 shadow-[0_12px_24px_rgba(110,91,75,0.08)] dark:bg-white/10 dark:text-white"
-                      : "bg-white/68 text-slate-600 dark:bg-white/5 dark:text-slate-200"
+                      ? "border-white/80 bg-white/92 text-slate-950 shadow-[0_8px_18px_rgba(110,91,75,0.08)] dark:border-white/10 dark:bg-white/10 dark:text-white"
+                      : "border-white/70 bg-white/84 text-slate-600 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
                   }`}
                   key={item.id}
                   onClick={() => handleNavigate(item.id)}

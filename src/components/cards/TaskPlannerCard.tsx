@@ -12,6 +12,7 @@ import type { Task } from "../../types/dashboard";
 type TaskPlannerCardProps = {
   onResetTasks: () => void;
   onToggleTask: (taskId: string) => void;
+  showSample: boolean;
   tasks: Task[];
 };
 
@@ -25,23 +26,30 @@ const priorityStyles: Record<Task["priority"], string> = {
 export function TaskPlannerCard({
   onResetTasks,
   onToggleTask,
+  showSample,
   tasks,
 }: TaskPlannerCardProps) {
-  const completedTasks = tasks.filter((task) => task.completed).length;
-  const progress = Math.round((completedTasks / tasks.length) * 100);
+  const visibleTasks = showSample ? tasks : [];
+  const completedTasks = visibleTasks.filter((task) => task.completed).length;
+  const progress = visibleTasks.length > 0
+    ? Math.round((completedTasks / visibleTasks.length) * 100)
+    : 0;
 
   return (
     <DashboardCard
       accent="peach"
       category="Planner"
-      description="Your day stays organized without feeling severe or overloaded."
+      description="Track today’s priorities with a simple checklist and clear progress."
       eyebrow="Task Planner"
       surface="solid"
-      title="Today deserves a kinder structure"
+      title="Keep today’s plan clear and manageable"
     >
       <div className="ui-subpanel border-orange-100/80 p-5 dark:border-orange-400/10">
         <div className="flex items-center justify-between gap-4">
           <div>
+            <p className="ui-demo-label">
+              {showSample ? "Sample checklist" : "Blank checklist"}
+            </p>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-300">
               Daily progress
             </p>
@@ -56,13 +64,13 @@ export function TaskPlannerCard({
 
         <div className="mt-5 h-3 rounded-full bg-orange-100/80 dark:bg-orange-400/10">
           <div
-            className="h-full rounded-full bg-[linear-gradient(90deg,#f7c49f,#e59673)]"
+            className="h-full rounded-full bg-[linear-gradient(90deg,#f3c29c,#e29579)]"
             style={{ width: `${progress}%` }}
           />
         </div>
 
         <div className="mt-6 space-y-3">
-          {tasks.map((task) => (
+          {visibleTasks.map((task) => (
             <div
               key={task.id}
               className="ui-subpanel flex items-start gap-3 p-4"
@@ -102,6 +110,11 @@ export function TaskPlannerCard({
               </div>
             </div>
           ))}
+          {visibleTasks.length === 0 ? (
+            <div className="ui-subpanel p-4 text-sm leading-6 text-slate-500 dark:text-slate-300">
+              Blank view is active. Turn on starter examples to preview a sample checklist here.
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -111,10 +124,12 @@ export function TaskPlannerCard({
             size="sm"
             variant="secondary"
           >
-            Reset checklist
+            Restore sample tasks
           </Button>
           <p className="text-sm text-slate-500 dark:text-slate-300">
-            Each task toggle is scoped to that item only.
+            {showSample
+              ? "Starter tasks make the planner easy to understand before you add your own."
+              : "Blank view keeps the checklist empty until you choose to load examples."}
           </p>
         </div>
       </div>
