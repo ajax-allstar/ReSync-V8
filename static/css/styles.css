@@ -1,0 +1,222 @@
+:root { 
+    color-scheme: light; 
+    --color-parchment: #f8f4ed;
+    --color-sand-100: #fbf8f2;
+    --color-sand-200: #f1e7d7;
+    --color-sand-300: #e2d3bb;
+    --color-sand-500: #c59d6f;
+    --color-moss-50: #edf4f0;
+    --color-moss-100: #dbe8df;
+    --color-moss-200: #bfd4c5;
+    --color-moss-500: #6b8f7b;
+    --color-moss-700: #406150;
+    --color-ink: #2e312d;
+    --color-skysoft: #b7ccd6;
+    --color-header-bg: rgba(255, 255, 255, 0.8);
+    --color-header-text: #ffffff;
+    --color-card-bg: rgba(255, 255, 255, 0.8);
+    --color-input-bg: rgba(255, 255, 255, 0.9);
+    --color-toast-bg: rgba(255, 255, 255, 0.95);
+    --color-toast-text: #44403c;
+}
+
+.theme-ocean {
+    color-scheme: light;
+    --color-parchment: #f0f8ff;
+    --color-sand-100: #e6f2ff;
+    --color-sand-200: #cce6ff;
+    --color-sand-300: #99ccff;
+    --color-sand-500: #66b3ff;
+    --color-moss-50: #e0f2f7;
+    --color-moss-100: #ccebf5;
+    --color-moss-200: #99d6eb;
+    --color-moss-500: #3399cc;
+    --color-moss-700: #006699;
+    --color-ink: #1a334d;
+    --color-skysoft: #b3d9ff;
+    --color-header-bg: rgba(255, 255, 255, 0.8);
+    --color-header-text: #ffffff;
+    --color-card-bg: rgba(255, 255, 255, 0.8);
+    --color-input-bg: rgba(255, 255, 255, 0.9);
+    --color-toast-bg: rgba(255, 255, 255, 0.95);
+    --color-toast-text: #44403c;
+}
+
+body { font-family: "Outfit", sans-serif; }
+.font-serif { font-family: "Newsreader", serif; }
+
+/* Keep theme transitions scoped to visible UI surfaces */
+body,
+header,
+main,
+#toast,
+#boot-status,
+.nav-link,
+button,
+input,
+select,
+textarea,
+.card-hover,
+.paper-noise {
+    transition: background-color 0.4s ease, color 0.3s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+select {
+    padding-right: 2.5rem !important;
+}
+
+.a11y-large-text { font-size: 1.15rem; }
+.a11y-large-text h1 { font-size: 4.5rem; }
+.a11y-large-text h2 { font-size: 1.75rem; }
+.a11y-large-text p, .a11y-large-text span, .a11y-large-text div, .a11y-large-text button, .a11y-large-text input, .a11y-large-text select { font-size: 1.1em; }
+
+.a11y-high-contrast {
+    --color-parchment: #ffffff;
+    --color-ink: #000000;
+    --color-moss-500: #005020;
+    --color-moss-700: #003010;
+    --color-sand-200: #000000;
+    --color-sand-300: #000000;
+}
+
+/* Card background overrides for dynamic styling */
+.bg-white\/80, .bg-white\/85, .bg-white\/75 { background-color: var(--color-card-bg); }
+.bg-white\/90 { background-color: var(--color-input-bg); }
+.bg-white { background-color: var(--color-input-bg); }
+.bg-white\/95 { background-color: var(--color-toast-bg); }
+
+.paper-noise {
+    background:
+        radial-gradient(circle at top left, rgba(197, 157, 111, 0.12), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(107, 143, 123, 0.14), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 244, 237, 0.96)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+}
+
+.nav-link { color: var(--color-ink); opacity: 0.8; transition: color 150ms ease, opacity 150ms ease; }
+.nav-link:hover, .nav-link:focus-visible { color: var(--color-moss-700); opacity: 1; }
+
+/* ========================
+   KEYFRAME ANIMATIONS
+   ======================== */
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bounce-in {
+    0% {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.96);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(4px) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(107, 143, 123, 0); }
+    50% { box-shadow: 0 0 20px 4px rgba(107, 143, 123, 0.15); }
+}
+
+/* Animation utility classes */
+.animate-fade-in-up {
+    opacity: 0;
+    animation: fade-in-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-fade-in {
+    opacity: 0;
+    animation: fade-in 0.5s ease forwards;
+}
+
+.animate-scale-in {
+    opacity: 0;
+    animation: scale-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-bounce-in {
+    animation: bounce-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Stagger delay classes */
+.stagger-1 { animation-delay: 0.08s; }
+.stagger-2 { animation-delay: 0.16s; }
+.stagger-3 { animation-delay: 0.24s; }
+.stagger-4 { animation-delay: 0.32s; }
+.stagger-5 { animation-delay: 0.40s; }
+.stagger-6 { animation-delay: 0.48s; }
+.stagger-7 { animation-delay: 0.56s; }
+.stagger-8 { animation-delay: 0.64s; }
+
+/* Interactive button hover lift */
+.hover-lift {
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Card hover effect */
+.card-hover {
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+    border-color: var(--color-moss-200);
+}
+
+input[type="checkbox"] { height: 1.1rem; width: 1.1rem; }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    .animate-fade-in-up,
+    .animate-fade-in,
+    .animate-scale-in,
+    .animate-bounce-in {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+/* Toast animation override */
+#toast {
+    background-color: var(--color-toast-bg);
+    color: var(--color-toast-text);
+}
+#toast.animate-bounce-in {
+    animation: bounce-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
